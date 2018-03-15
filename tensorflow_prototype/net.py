@@ -3,7 +3,7 @@ import pandas as pd
 import tensorflow as tf
 
 MAX_DEGREE = 20     # TODO: PARAMETRIZE
-path = '/home/kuba/Development/Quantum/tensorflow/ai-task-samples.csv'
+path = '/path/to/csv/file/ai-task-samples.csv'
 dataset = pd.read_csv(path, names=['x', 'y'], header=None)
 xs = dataset['x'].as_matrix()
 ys = dataset['y'].as_matrix()
