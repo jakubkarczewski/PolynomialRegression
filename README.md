@@ -4,16 +4,12 @@ This repository contains an implementation of a simple neural network for polyno
 
 ## Depenedencies and installation
 TODO: which python exactly?
-The network was implemented using Python 2.7 with Numpy. To get Numpy on Linux open terminal and run:
-
+The network was implemented using Python 2.7 with Numpy. To get Numpy activate your virtualenv and run:
 ```
 pip install numpy
 ```
-After collecting numpy run:
-```
-chmod +x net.py
-```
-to allow it's execution without ```python``` prefix.
+Afterwards check which python you are using with ```which python``` and copy&paste the path into first line of the script (shebang) so that it looks like this: ```#! /path/to/my/python```. Then run ```mv net.py net``` and ```chmod +x net``` to make it executable. Now it should meet the requirements as far as interface is concerned.
+
 
 ## Instruction:
 ### Training the network
