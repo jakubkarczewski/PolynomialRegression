@@ -7,9 +7,9 @@ random.seed(1)
 # constants
 TRAIN = False
 INFER = False
-PATH_TO_CSV = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/ai-task-samples.csv'
-SAVE_PATH = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/weights.npy'
-SAVE_PATH_SCALE = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/scaling.npy'
+PATH_TO_CSV = './ai-task-samples.csv'
+SAVE_PATH = './weights.npy'
+SAVE_PATH_SCALE = './scaling.npy'
 POLYNOMIAL_DEGREE = 0
 INPUT = 0
 
@@ -79,7 +79,7 @@ def train():
     data_y /= scale_y
 
     degree_data = []
-    for model_degree in range(1, POLYNOMIAL_DEGREE):
+    for model_degree in range(1, POLYNOMIAL_DEGREE + 2):
         # turn input X into matrix of Xs to nth power
         data_x = np.power(data_x_raw, range(model_degree))
         # generate random initial values for weights

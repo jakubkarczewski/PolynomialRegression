@@ -51,7 +51,7 @@ Implemented network is a very simple 2 layer neural network.
 
 The diagram of training the network could be described as follows:
 
-![alt text](https://github.com/jakubkarczewski/PolynomialRegression/blob/master/net.png)
+![alt text](https://github.com/jakubkarczewski/PolynomialRegression/blob/master/pics/net.png)
 
 
 ### Error function 
