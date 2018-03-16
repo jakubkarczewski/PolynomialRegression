@@ -2,7 +2,6 @@ import sys
 import numpy as np
 import random
 
-random.seed(1)
 
 # constants
 TRAIN = False
