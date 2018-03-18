@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-MAX_DEGREE = 20     # TODO: PARAMETRIZE
-path = '/path/to/csv/file/ai-task-samples.csv'
+MAX_DEGREE = 5     # TODO: PARAMETRIZE
+path = '/home/kuba/Development/Quantum/tensorflow/ai-task-samples.csv'
 dataset = pd.read_csv(path, names=['x', 'y'], header=None)
 xs = dataset['x'].as_matrix()
 ys = dataset['y'].as_matrix()
@@ -37,7 +37,7 @@ for degree in range(2, MAX_DEGREE):
 
     saver = tf.train.Saver()
 
-    n_epochs = 100
+    n_epochs = 5
     sess = tf.InteractiveSession()
 
     sess.run(tf.global_variables_initializer())
