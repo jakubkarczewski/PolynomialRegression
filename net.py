@@ -2,16 +2,39 @@ import sys
 import numpy as np
 
 
+# constants
+TRAIN = False
+INFER = False
+PATH_TO_CSV = '/home/kuba/Development/Quantum/tensorflow/ai-task-samples.csv'
+SAVE_PATH = '/home/kuba/Development/Quantum/tensorflow/weights.npy'
+SAVE_PATH_SCALE = '/home/kuba/Development/Quantum/tensorflow/scaling.npy'
+POLYNOMIAL_DEGREE = 0
+INPUT = 0
+
+
 def terminate():
     print('Usage: \n - net.py train POLYNOMIAL DEGREE PATH_TO_CSV \n'
           ' - net.py estimate X')
     sys.exit()
 
-# constants
-TRAIN = True
-INFER = False
-PATH_TO_CSV = '/home/kuba/Development/Quantum/tensorflow/ai-task-samples.csv'
-POLYNOMIAL_DEGREE = 10
+if len(sys.argv) > 2:
+    if sys.argv[1] == 'train':
+        try:
+            POLYNOMIAL_DEGREE = int(sys.argv[2])
+            PATH_TO_CSV = str(sys.argv[3])
+            TRAIN = True
+        except Exception:
+            terminate()
+    elif sys.argv[1] == 'estimate':
+        try:
+            INPUT = float(sys.argv[2])
+            INFER = True
+        except Exception:
+            terminate()
+    else:
+        terminate()
+else:
+    terminate()
 
 
 def compute_gradient(w, x, y):
@@ -20,6 +43,21 @@ def compute_gradient(w, x, y):
     mse = (1.0 / len(x)) * np.sum(np.power(error, 2))
     gradient = -(1.0 / len(x)) * error.dot(x)
     return gradient, mse
+
+
+def infer():
+    weights = np.load(SAVE_PATH)
+    output = 0
+    for i, coef in enumerate(weights[::-1]):
+        output += coef * INPUT ** i
+    return output
+
+
+def save_scaling(data_x, data_y):
+    scaling_coef = np.array([np.max(np.abs(data_x), axis=0),
+                             np.max(np.abs(data_y), axis=0)])
+    np.save(SAVE_PATH_SCALE, scaling_coef)
+    return scaling_coef[0], scaling_coef[1]
 
 
 def train():
@@ -33,18 +71,21 @@ def train():
         data_x_raw[i] = my_data[i][0]
         data_y[i] = my_data[i][1]
 
+    scale_x, scale_y = save_scaling(data_x_raw, data_y)
+
+    data_x_raw /= scale_x
+    data_y /= scale_y
+
     degree_data = []
     for model_degree in range(1, POLYNOMIAL_DEGREE):
         # turn input X into matrix of Xs to nth power
         data_x = np.power(data_x_raw, range(model_degree))
-        # normalize
-        data_x /= np.max(data_x, axis=0)
         # generate random initial values for weights
         w = np.random.randn(model_degree)
 
         # SGD params
-        learning_rate = 0.5
-        error_tolerance = 1e-3
+        learning_rate = 0.2
+        error_tolerance = 1e-5
         epochs = 1
         decay = 0.99
         batch_size = 10
@@ -67,24 +108,19 @@ def train():
                 iterations += 1
                 used_data += batch_size
 
-            # Keep track of our performance
             if epochs % 100 == 0:
                 new_error = compute_gradient(w, data_x, data_y)[1]
-                print "Epoch: %d - Error: %.4f" % (epochs, new_error)
 
                 # stopping conditions
                 if abs(new_error - error) < error_tolerance:
-                    print "Converged, stopping"
                     break
 
             if epochs > max_epochs:
-                print 'Early stopping'
                 break
 
             learning_rate = learning_rate * (decay ** int(epochs / 1000))
             epochs += 1
 
-        print "weights (from 0th to nth) =", w
         degree_data.append([model_degree, new_error, w, iterations])
 
     min_iter = degree_data[0][3]
@@ -93,8 +129,12 @@ def train():
         if elem[3] < min_iter:
             min_iter = elem[3]
             winner_row = elem
-    print winner_row
+    output = winner_row[2][::-1]
+    np.save(SAVE_PATH, output)
+    return output
 
 if TRAIN:
-    train()
+    print(train())
+if INFER:
+    print(infer())
 
