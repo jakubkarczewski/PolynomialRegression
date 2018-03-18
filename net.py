@@ -1,13 +1,15 @@
 import sys
 import numpy as np
+import random
 
+random.seed(1)
 
 # constants
 TRAIN = False
 INFER = False
-PATH_TO_CSV = '/home/kuba/Development/Quantum/tensorflow/ai-task-samples.csv'
-SAVE_PATH = '/home/kuba/Development/Quantum/tensorflow/weights.npy'
-SAVE_PATH_SCALE = '/home/kuba/Development/Quantum/tensorflow/scaling.npy'
+PATH_TO_CSV = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/ai-task-samples.csv'
+SAVE_PATH = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/weights.npy'
+SAVE_PATH_SCALE = '/home/kuba/Development/Quantum/tensorflow/repo/PolynomialRegression/scaling.npy'
 POLYNOMIAL_DEGREE = 0
 INPUT = 0
 
@@ -84,7 +86,7 @@ def train():
         w = np.random.randn(model_degree)
 
         # SGD params
-        learning_rate = 0.2
+        learning_rate = 0.5
         error_tolerance = 1e-5
         epochs = 1
         decay = 0.99
@@ -123,11 +125,11 @@ def train():
 
         degree_data.append([model_degree, new_error, w, iterations])
 
-    min_iter = degree_data[0][3]
+    min_error = degree_data[0][1]
     winner_row = degree_data[0]
     for elem in degree_data:
-        if elem[3] < min_iter:
-            min_iter = elem[3]
+        if elem[1] < min_error:
+            min_error = elem[3]
             winner_row = elem
     output = winner_row[2][::-1]
     np.save(SAVE_PATH, output)
