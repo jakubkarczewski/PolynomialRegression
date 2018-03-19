@@ -2,13 +2,18 @@
 This repository contains an implementation of a simple neural network for polynomial regression.
 
 
-## Depenedencies
+## Depenedencies and installation
 TODO: which python exactly?
 The network was implemented using Python 2.7 with Numpy. To get Numpy on Linux open terminal and run:
 
 ```
 pip install numpy
 ```
+After collecting numpy run:
+```
+chmod +x net.py
+```
+to allow it's execution without ```python``` prefix.
 
 ## Instruction:
 ### Training the network
