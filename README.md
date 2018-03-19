@@ -3,8 +3,7 @@ This repository contains an implementation of a simple neural network for polyno
 
 
 ## Depenedencies and installation
-TODO: which python exactly?
-The network was implemented using Python 2.7 with Numpy. To get Numpy activate your virtualenv and run:
+The network was implemented using Python 2.7.12  with Numpy. To get Numpy activate your virtualenv and run:
 ```
 pip install numpy
 ```
@@ -51,7 +50,6 @@ The diagram of training the network could be described as follows:
 
 
 ### Error function 
-TODO: MAKE SURE it's right
 The error used in this implementation is known as Mean Squared Error (MSE). It is calculated by computing mean of squared errors for each data point. In Python it looks like this: ```mse = (1.0 / len(x)) * np.sum(np.power(y - y_estimate, 2)) ```
 
 ### Stochastic Gradient Descent

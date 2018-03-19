@@ -1,8 +1,9 @@
+#! /home/kuba/Development/Quantum/quantum/bin/python
 import sys
 import numpy as np
 
 
-np.random.seed(1)
+np.random.seed(5)
 
 # constants
 TRAIN = False
@@ -52,7 +53,7 @@ def infer():
     output = 0
     for i, coef in enumerate(weights[::-1]):
         output += coef * INPUT ** i
-    return output
+    return 200*  output
 
 
 def save_scaling(data_x, data_y):
@@ -90,7 +91,7 @@ def train():
         error_tolerance = 1e-5
         epochs = 1
         decay = 0.99
-        batch_size = 10
+        batch_size = 100
         iterations = 0
         max_epochs = 1000
 
@@ -118,19 +119,21 @@ def train():
                     break
 
             if epochs > max_epochs:
+		new_error = compute_gradient(w, data_x, data_y)[1]
                 break
 
             learning_rate = learning_rate * (decay ** int(epochs / 1000))
             epochs += 1
-
+	# print model_degree, new_error, w, iterations
         degree_data.append([model_degree, new_error, w, iterations])
 
-    min_error = degree_data[0][1]
-    winner_row = degree_data[0]
+    min_error = 9999
+    winner_row = None
     for elem in degree_data:
         if elem[1] < min_error:
-            min_error = elem[3]
+            min_error = elem[1]
             winner_row = elem
+    
     output = winner_row[2][::-1]
     np.save(SAVE_PATH, output)
     return output
