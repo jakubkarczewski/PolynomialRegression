@@ -73,4 +73,7 @@ For example if the polynomial saved by the netork would be f(x) = 3 * x^3 + 2 * 
 ```
 and would output ```5```
 
+## Performance
+![alt text](https://github.com/jakubkarczewski/PolynomialRegression/blob/master/pics/performance.png)
+
 
