@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 
-np.random.seed(5)
+#np.random.seed(5)
 
 # constants
 TRAIN = False
@@ -56,11 +56,59 @@ def infer():
     return 200*  output
 
 
-def save_scaling(data_x, data_y):
-    scaling_coef = np.array([np.max(np.abs(data_x), axis=0),
-                             np.max(np.abs(data_y), axis=0)])
-    np.save(SAVE_PATH_SCALE, scaling_coef)
-    return scaling_coef[0], scaling_coef[1]
+# def save_scaling(data_x, data_y):
+#     scaling_coef = np.array([np.max(np.abs(data_x), axis=0),
+#                              np.max(np.abs(data_y), axis=0)])
+#     np.save(SAVE_PATH_SCALE, scaling_coef)
+#     return scaling_coef[0], scaling_coef[1]
+
+def train_nth_degree(data_x_raw, data_y, model_degree):
+    # turn input X into matrix of Xs to nth power
+    data_x = np.power(data_x_raw, range(model_degree))
+    print np.max(data_x, axis=0)
+    data_x /= np.max(data_x, axis=0)
+    # generate random initial values for weights
+    w = np.random.randn(model_degree)
+
+    # SGD params
+    learning_rate = 0.5
+    error_tolerance = 1e-6
+    epochs = 1
+    decay = 0.99
+    batch_size = 100
+    iterations = 0
+    max_epochs = 1000
+
+    while True:
+        # shuffle
+        degree = np.random.permutation(len(data_x))
+        data_x = data_x[degree]
+        data_y = data_y[degree]
+
+        used_data = 0
+        while used_data < len(data_x):
+            tx = data_x[used_data: used_data + batch_size]
+            ty = data_y[used_data: used_data + batch_size]
+            gradient = compute_gradient(w, tx, ty)[0]
+            error = compute_gradient(w, data_x, data_y)[1]
+            w -= learning_rate * gradient
+            iterations += 1
+            used_data += batch_size
+
+        if epochs % 100 == 0:
+            new_error = compute_gradient(w, data_x, data_y)[1]
+            print "Epoch: %d - Error: %.4f" % (epochs, new_error)
+            # stopping conditions
+            if abs(new_error - error) < error_tolerance:
+                break
+
+        if epochs > max_epochs:
+            new_error = compute_gradient(w, data_x, data_y)[1]
+            break
+
+        learning_rate = learning_rate * (decay ** int(epochs / 1000))
+        epochs += 1
+    return model_degree, new_error, w, iterations
 
 
 def train():
@@ -74,61 +122,20 @@ def train():
         data_x_raw[i] = my_data[i][0]
         data_y[i] = my_data[i][1]
 
-    scale_x, scale_y = save_scaling(data_x_raw, data_y)
-
-    data_x_raw /= scale_x
-    data_y /= scale_y
+    # scale_x, scale_y = save_scaling(data_x_raw, data_y)
+    # print scale_x, scale_y
+    #
+    # data_x_raw /= scale_y
+    # data_y /= scale_y
 
     degree_data = []
     for model_degree in range(1, POLYNOMIAL_DEGREE):
-        # turn input X into matrix of Xs to nth power
-        data_x = np.power(data_x_raw, range(model_degree))
-        # generate random initial values for weights
-        w = np.random.randn(model_degree)
+        single_output = train_nth_degree(data_x_raw, data_y, model_degree)
+        print single_output
+        degree_data.append(single_output)
 
-        # SGD params
-        learning_rate = 0.5
-        error_tolerance = 1e-5
-        epochs = 1
-        decay = 0.99
-        batch_size = 100
-        iterations = 0
-        max_epochs = 1000
-
-        while True:
-            # shuffle
-            degree = np.random.permutation(len(data_x))
-            data_x = data_x[degree]
-            data_y = data_y[degree]
-
-            used_data = 0
-            while used_data < len(data_x):
-                tx = data_x[used_data: used_data + batch_size]
-                ty = data_y[used_data: used_data + batch_size]
-                gradient = compute_gradient(w, tx, ty)[0]
-                error = compute_gradient(w, data_x, data_y)[1]
-                w -= learning_rate * gradient
-                iterations += 1
-                used_data += batch_size
-
-            if epochs % 100 == 0:
-                new_error = compute_gradient(w, data_x, data_y)[1]
-
-                # stopping conditions
-                if abs(new_error - error) < error_tolerance:
-                    break
-
-            if epochs > max_epochs:
-		new_error = compute_gradient(w, data_x, data_y)[1]
-                break
-
-            learning_rate = learning_rate * (decay ** int(epochs / 1000))
-            epochs += 1
-	# print model_degree, new_error, w, iterations
-        degree_data.append([model_degree, new_error, w, iterations])
-
-    min_error = 9999
-    winner_row = None
+    min_error = degree_data[0][1]
+    winner_row = degree_data[0]
     for elem in degree_data:
         if elem[1] < min_error:
             min_error = elem[1]
