@@ -1,4 +1,4 @@
-
+#! /usr/bin/python 
 import sys
 import numpy as np
 
@@ -10,7 +10,7 @@ TRAIN = False
 INFER = False
 PATH_TO_CSV = './ai-task-samples.csv'
 SAVE_PATH = './weights.npy'
-SAVE_PATH_SCALE = './scaling.npy'
+#SAVE_PATH_SCALE = './scaling.npy'
 POLYNOMIAL_DEGREE = 2
 INPUT = 0
 
@@ -50,10 +50,10 @@ def compute_gradient(w, x, y):
 
 def infer():
     weights = np.load(SAVE_PATH)[::-1]
-    scaling = np.load(SAVE_PATH_SCALE)
-    scaled_weights = [b / a for a, b in zip(scaling, weights)]
+    #scaling = np.load(SAVE_PATH_SCALE)
+    #scaled_weights = [b / a for a, b in zip(scaling, weights)]
     output = 0
-    for i, coef in enumerate(scaled_weights):
+    for i, coef in enumerate(weights):
         output += coef * INPUT ** i
     return output
 
@@ -132,10 +132,11 @@ def train():
             min_error = elem[1]
             winner_row = elem
     
-    output = winner_row[2][::-1]
-    np.save(SAVE_PATH, output)
+    weights = winner_row[2]
     scaling = winner_row[4]
-    np.save(SAVE_PATH_SCALE, scaling)
+    scaled_weights = [b / a for a, b in zip(scaling, weights)]
+    output = scaled_weights[::-1]
+    np.save(SAVE_PATH, output)
     return output
 
 if TRAIN:
