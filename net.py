@@ -1,9 +1,9 @@
-#! /home/kuba/Development/Quantum/quantum/bin/python
+
 import sys
 import numpy as np
 
 
-#np.random.seed(5)
+np.random.seed(5)
 
 # constants
 TRAIN = False
@@ -49,24 +49,21 @@ def compute_gradient(w, x, y):
 
 
 def infer():
-    weights = np.load(SAVE_PATH)
+    weights = np.load(SAVE_PATH)[::-1]
+    scaling = np.load(SAVE_PATH_SCALE)
+    scaled_weights = [b / a for a, b in zip(scaling, weights)]
     output = 0
-    for i, coef in enumerate(weights[::-1]):
+    for i, coef in enumerate(scaled_weights):
         output += coef * INPUT ** i
-    return 200*  output
+    return output
 
 
-# def save_scaling(data_x, data_y):
-#     scaling_coef = np.array([np.max(np.abs(data_x), axis=0),
-#                              np.max(np.abs(data_y), axis=0)])
-#     np.save(SAVE_PATH_SCALE, scaling_coef)
-#     return scaling_coef[0], scaling_coef[1]
 
 def train_nth_degree(data_x_raw, data_y, model_degree):
     # turn input X into matrix of Xs to nth power
     data_x = np.power(data_x_raw, range(model_degree))
-    print np.max(data_x, axis=0)
-    data_x /= np.max(data_x, axis=0)
+    scaling = np.max(data_x, axis=0)
+    data_x /= scaling
     # generate random initial values for weights
     w = np.random.randn(model_degree)
 
@@ -108,7 +105,7 @@ def train_nth_degree(data_x_raw, data_y, model_degree):
 
         learning_rate = learning_rate * (decay ** int(epochs / 1000))
         epochs += 1
-    return model_degree, new_error, w, iterations
+    return model_degree, new_error, w, iterations, scaling
 
 
 def train():
@@ -121,12 +118,6 @@ def train():
     for i in range(len(my_data)):
         data_x_raw[i] = my_data[i][0]
         data_y[i] = my_data[i][1]
-
-    # scale_x, scale_y = save_scaling(data_x_raw, data_y)
-    # print scale_x, scale_y
-    #
-    # data_x_raw /= scale_y
-    # data_y /= scale_y
 
     degree_data = []
     for model_degree in range(1, POLYNOMIAL_DEGREE):
@@ -143,6 +134,8 @@ def train():
     
     output = winner_row[2][::-1]
     np.save(SAVE_PATH, output)
+    scaling = winner_row[4]
+    np.save(SAVE_PATH_SCALE, scaling)
     return output
 
 if TRAIN:
