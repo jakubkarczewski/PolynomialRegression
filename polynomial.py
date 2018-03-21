@@ -59,7 +59,7 @@ def infer():
 
 
 def train_nth_degree(data_x_raw, data_y, model_degree):
-    ''' Find optimal coefficients and error for giben degree'''
+    ''' Find optimal coefficients and error for given degree'''
     # turn input X into matrix of Xs to nth power
     data_x = np.power(data_x_raw, range(model_degree))
     # normalize inputs
