@@ -2,23 +2,23 @@
 import sys
 import numpy as np
 
-
+# set seed for deterministic output
 np.random.seed(5)
 
-# constants
 TRAIN = False
 INFER = False
 PATH_TO_CSV = './ai-task-samples.csv'
 SAVE_PATH = './weights.npy'
-#SAVE_PATH_SCALE = './scaling.npy'
 POLYNOMIAL_DEGREE = 2
 INPUT = 0
 
 
 def terminate():
-    print('Usage: \n - net.py train POLYNOMIAL DEGREE PATH_TO_CSV \n'
-          ' - net.py estimate X')
+    ''' Show prompt and exit '''
+    print('Usage: \n - ./polynomial train POLYNOMIAL_'
+          'DEGREE PATH_TO_CSV \n - ./polynomial estimate X')
     sys.exit()
+
 
 if len(sys.argv) > 2:
     if sys.argv[1] == 'train':
@@ -41,6 +41,7 @@ else:
 
 
 def compute_gradient(w, x, y):
+    ''' Compute gradient and MSE '''
     y_estimate = x.dot(w).flatten()
     error = (y.flatten() - y_estimate)
     mse = (1.0 / len(x)) * np.sum(np.power(error, 2))
@@ -49,25 +50,25 @@ def compute_gradient(w, x, y):
 
 
 def infer():
+    ''' Run forward pass through the network '''
     weights = np.load(SAVE_PATH)[::-1]
-    #scaling = np.load(SAVE_PATH_SCALE)
-    #scaled_weights = [b / a for a, b in zip(scaling, weights)]
     output = 0
     for i, coef in enumerate(weights):
         output += coef * INPUT ** i
     return output
 
 
-
 def train_nth_degree(data_x_raw, data_y, model_degree):
+    ''' Find optimal coefficients and error for giben degree'''
     # turn input X into matrix of Xs to nth power
     data_x = np.power(data_x_raw, range(model_degree))
+    # normalize inputs
     scaling = np.max(data_x, axis=0)
     data_x /= scaling
     # generate random initial values for weights
     w = np.random.randn(model_degree)
 
-    # SGD params
+    # SGD parameters
     learning_rate = 0.5
     error_tolerance = 1e-6
     epochs = 1
@@ -77,34 +78,38 @@ def train_nth_degree(data_x_raw, data_y, model_degree):
     max_epochs = 1000
 
     while True:
-        # shuffle
+        # shuffle training data
         degree = np.random.permutation(len(data_x))
         data_x = data_x[degree]
         data_y = data_y[degree]
 
         used_data = 0
-        while used_data < len(data_x):
+        while used_data < len(data_x):  # one iteration per batch
             tx = data_x[used_data: used_data + batch_size]
             ty = data_y[used_data: used_data + batch_size]
+            # compute gradient
             gradient = compute_gradient(w, tx, ty)[0]
             error = compute_gradient(w, data_x, data_y)[1]
+            # correct weights
             w -= learning_rate * gradient
             iterations += 1
             used_data += batch_size
 
         if epochs % 100 == 0:
             new_error = compute_gradient(w, data_x, data_y)[1]
-            print "Epoch: %d - Error: %.4f" % (epochs, new_error)
-            # stopping conditions
+            # check if the model converges
             if abs(new_error - error) < error_tolerance:
                 break
 
         if epochs > max_epochs:
+            # early stopping
             new_error = compute_gradient(w, data_x, data_y)[1]
             break
 
+        # decay the LR
         learning_rate = learning_rate * (decay ** int(epochs / 1000))
         epochs += 1
+
     return model_degree, new_error, w, iterations, scaling
 
 
@@ -120,13 +125,14 @@ def train():
         data_y[i] = my_data[i][1]
 
     degree_data = []
+    # one iteration per model degree
     for model_degree in range(1, POLYNOMIAL_DEGREE):
         single_output = train_nth_degree(data_x_raw, data_y, model_degree)
-        print single_output
         degree_data.append(single_output)
 
     min_error = degree_data[0][1]
     winner_row = degree_data[0]
+    # find model with least error
     for elem in degree_data:
         if elem[1] < min_error:
             min_error = elem[1]
@@ -134,13 +140,14 @@ def train():
     
     weights = winner_row[2]
     scaling = winner_row[4]
+    # scale the polynomial coefficients
     scaled_weights = [b / a for a, b in zip(scaling, weights)]
     output = scaled_weights[::-1]
     np.save(SAVE_PATH, output)
     return output
 
-if TRAIN:
-    print(train())
-if INFER:
-    print(infer())
 
+if TRAIN:
+    print train()
+if INFER:
+    print infer()
