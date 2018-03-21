@@ -2,7 +2,7 @@
 This repository contains an implementation of a simple neural network for polynomial regression.
 
 
-## Depenedencies and installation
+## Dependencies and installation
 The network was implemented using Python 2.7.12 with Numpy as only external library. To get Numpy activate your virtualenv (if you have one) and run:
 ```
 pip install numpy
