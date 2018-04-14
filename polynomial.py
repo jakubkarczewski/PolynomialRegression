@@ -5,8 +5,6 @@ import numpy as np
 # set seed for deterministic output
 np.random.seed(5)
 
-TRAIN = False
-INFER = False
 PATH_TO_CSV = None
 SAVE_PATH = None
 POLYNOMIAL_DEGREE = 2
@@ -15,7 +13,7 @@ POLYNOMIAL_DEGREE = 2
 def terminate():
     ''' Show prompt and exit '''
     print('Usage: \n - ./polynomial train POLYNOMIAL_'
-          'DEGREE PATH_TO_CSV [SAVE_PATH] \n - ./polynomial estimate X')
+          'DEGREE PATH_TO_CSV [SAVE_PATH] \n - ./polynomial estimate X [WEIGHTS_PATH]')
     return
 
 
@@ -26,19 +24,22 @@ if len(sys.argv) > 2:
             PATH_TO_CSV = str(sys.argv[3])
             if len(sys.argv) >= 5:
                 SAVE_PATH = str(sys.argv[4])
-            else:
-                SAVE_PATH = '~/weights.npy'
         except Exception:
             terminate()
     elif sys.argv[1] == 'estimate':
         try:
             _ = float(sys.argv[2])
+            if len(sys.argv) >= 5:
+                SAVE_PATH = str(sys.argv[4])
         except Exception:
             terminate()
     else:
         terminate()
 else:
     terminate()
+
+if not SAVE_PATH:
+    SAVE_PATH = './weights.npy' # todo: add directory where everyone can write
 
 
 class ShallowNet:
@@ -53,7 +54,7 @@ class ShallowNet:
         self.max_epochs = max_epochs
         self.polynomial_degree = polynomial_degree
 
-    def compute_gradient(w, x, y):
+    def compute_gradient(self, w, x, y):
         ''' Compute gradient and MSE '''
         y_estimate = x.dot(w).flatten()
         error = (y.flatten() - y_estimate)
@@ -61,7 +62,6 @@ class ShallowNet:
         gradient = -(1.0 / len(x)) * error.dot(x)
         return gradient, mse
 
-    @staticmethod
     def infer(self, input):
         ''' Run forward pass through the network '''
         weights = np.load(SAVE_PATH)[::-1]
@@ -70,7 +70,6 @@ class ShallowNet:
             output += coef * input ** i
         return output
 
-    @staticmethod
     def train_nth_degree(self, data_x_raw, data_y, model_degree):
         ''' Find optimal coefficients and error for given degree'''
         # turn input X into matrix of Xs to nth power
@@ -86,8 +85,8 @@ class ShallowNet:
         new_error = 10
         error = 1
 
-        while (abs(new_error - error) < self.error_tolerance
-               and epochs > self.max_epochs):
+        while (abs(new_error - error) > self.error_tolerance
+               and epochs < self.max_epochs):
             # shuffle training data
             degree = np.random.permutation(len(data_x))
             data_x = data_x[degree]
@@ -107,12 +106,12 @@ class ShallowNet:
 
             new_error = self.compute_gradient(w, data_x, data_y)[1]
             # decay the LR
-            self.learning_rate = self.learning_rate * (self.decay ** int(epochs / 1000))
+            self.learning_rate = (self.learning_rate * (self.decay **
+                                                        int(epochs / 1000)))
             epochs += 1
 
         return model_degree, new_error, w, iterations, scaling
 
-    @staticmethod
     def train(self):
         # load .csv data
         my_data = np.genfromtxt(PATH_TO_CSV, delimiter=',')
@@ -127,4 +126,29 @@ class ShallowNet:
         degree_data = []
         # one iteration per model degree
         for model_degree in range(1, POLYNOMIAL_DEGREE):
-            single_output = self
+            single_output = self.train_nth_degree(data_x_raw, data_y,
+                                                 model_degree)
+            degree_data.append(single_output)
+
+        min_error = degree_data[0][1]
+        winner_row = degree_data[0]
+        # find model with least error
+        for elem in degree_data:
+            if elem[1] < min_error:
+                min_error = elem[1]
+                winner_row = elem
+
+        weights = winner_row[2]
+        scaling = winner_row[4]
+        # scale the polynomial coefficients
+        scaled_weights = [b / a for a, b in zip(scaling, weights)]
+        output = scaled_weights[::-1]
+        np.save(SAVE_PATH, output)
+        return output
+
+if __name__ == '__main__':
+    net = ShallowNet(polynomial_degree=POLYNOMIAL_DEGREE)
+    if sys.argv[1] == 'train':
+        print(net.train())
+    if sys.argv[1] == 'estimate':
+        print(net.infer(float(sys.argv[2])))

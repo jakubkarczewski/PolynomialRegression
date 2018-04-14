@@ -1,14 +1,11 @@
 import sys
-import shutil
 import os
 
 shebang = '#! ' + str(sys.executable) + '\n'
-from_file = open("polynomial.py") 
-line = from_file.readline()
-
-to_file = open("polynomial.py",mode="w")
-to_file.write(shebang)
-shutil.copyfileobj(from_file, to_file)
+with open('polynomial.py', 'r+') as f:
+    file_data = f.read()
+    f.seek(0, 0)
+    f.write(shebang.rstrip('\r\n') + '\n' + file_data)
 
 os.system('mv polynomial.py polynomial')
 os.system('chmod +x polynomial')
