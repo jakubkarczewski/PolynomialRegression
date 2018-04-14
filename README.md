@@ -3,11 +3,11 @@ This repository contains an implementation of a simple neural network for polyno
 
 
 ## Dependencies and installation
-The network was implemented using Python 2.7.12 with Numpy as only external library. To get Numpy activate your virtualenv (if you have one) and run:
+The network was implemented using Python 2.7.12 with Numpy as only external library. To get all dependencies activate your virtualenv (if you have one) and run:
 ```
 pip install -r requirements.txt
 ```
-Having done that, check which python you are using with:
+Having done that, run helper script with:
 ```
 python setup.py
 ```
