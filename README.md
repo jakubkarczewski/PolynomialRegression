@@ -26,7 +26,7 @@ where POLYNOMIAL_DEGREE is an integer that stands for highest order of polynomia
 
 For example, to find the optimal polynomial of order no higher than 6 for data in ```./data_dir/my_csv_data.csv``` you want to run:
 ```
-./polynomial train 6 ./data_dir/my_csv_data.csv
+./polynomial train 6 ./data_dir/my_csv_data.csv [SAVE_PATH]
 ```
 The output will be a list with polynomial coefficients, from highest to constant.
 
@@ -35,7 +35,7 @@ To run a forward pass through the trained network you need to provide it with an
 
 To estimate run:
 ```
-./polynomial estimate X
+./polynomial estimate X [SAVE PATH]
 ```
 where X is the input.
 
