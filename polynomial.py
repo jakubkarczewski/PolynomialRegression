@@ -1,4 +1,3 @@
-#! /home/kuba/Development/Quantum/quantum/bin/python
 import sys
 import numpy as np
 
