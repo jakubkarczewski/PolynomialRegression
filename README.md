@@ -5,25 +5,12 @@ This repository contains an implementation of a simple neural network for polyno
 ## Dependencies and installation
 The network was implemented using Python 2.7.12 with Numpy as only external library. To get Numpy activate your virtualenv (if you have one) and run:
 ```
-pip install numpy
+pip install -r requirements.txt
 ```
 Having done that, check which python you are using with:
 ```
-which python
+python setup.py
 ```
-and copy&paste the path into first line of the script with ```!# ``` prefix (shebang).
-
-Example: ```#! /path/to/my/python```.
-Finally run:
-```
-mv polynomial.py polynomial
-```
-and
-```
-chmod +x polynomial
-```
-You can also specify the path for saving the network by editing variable ```SAVE_PATH``` line 11th.
-
 You are good to go!
 
 
@@ -33,9 +20,9 @@ To train the network you need .csv training data file with 2 floats per line sep
 
 To train run:
 ```
-./polynomial train POLYNOMIAL_DEGREE PATH_TO_CSV
+./polynomial train POLYNOMIAL_DEGREE PATH_TO_CSV [SAVE_PATH]
 ```
-where POLYNOMIAL_DEGREE is an integer that stands for highest order of polynomial and PATH_TO_CSV is the path to .csv training data file.
+where POLYNOMIAL_DEGREE is an integer that stands for highest order of polynomial and PATH_TO_CSV is the path to .csv training data file. You can also sepecify path for saving the weights (the default is saving in your home directory)
 
 For example, to find the optimal polynomial of order no higher than 6 for data in ```./data_dir/my_csv_data.csv``` you want to run:
 ```
