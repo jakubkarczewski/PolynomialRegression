@@ -1,5 +1,5 @@
 # Polynomial Regression
-This repository contains an implementation of a simple neural network for polynomial regression.
+This repository contains an implementation of perceptron with linear activation for polynomial regression.
 
 
 ## Dependencies and installation
