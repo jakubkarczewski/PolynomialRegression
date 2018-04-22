@@ -1,4 +1,6 @@
+import os
 import sys
+
 import numpy as np
 
 # set seed for deterministic output
@@ -12,7 +14,8 @@ POLYNOMIAL_DEGREE = 2
 def terminate():
     ''' Show prompt and exit '''
     print('Usage: \n - ./polynomial train POLYNOMIAL_'
-          'DEGREE PATH_TO_CSV [SAVE_PATH] \n - ./polynomial estimate X [WEIGHTS_PATH]')
+          'DEGREE PATH_TO_CSV [SAVE_PATH] \n '
+          '- ./polynomial estimate X [WEIGHTS_PATH]')
     return
 
 
@@ -37,8 +40,9 @@ if len(sys.argv) > 2:
 else:
     terminate()
 
+# save weights in home dir by default
 if not SAVE_PATH:
-    SAVE_PATH = './weights.npy' # todo: add directory where everyone can write
+    SAVE_PATH = os.path.join(os.path.expanduser('~'), 'weights.npy')
 
 
 class ShallowNet:
@@ -55,18 +59,23 @@ class ShallowNet:
 
     def compute_gradient(self, w, x, y):
         ''' Compute gradient and MSE '''
+        # run forward pass
         y_estimate = x.dot(w).flatten()
+        # estimate error for each input
         error = (y.flatten() - y_estimate)
+        # compute MSE
         mse = (1.0 / len(x)) * np.sum(np.power(error, 2))
+        # compute correction for each weight
         gradient = -(1.0 / len(x)) * error.dot(x)
         return gradient, mse
 
     def infer(self, input):
         ''' Run forward pass through the network '''
         weights = np.load(SAVE_PATH)[::-1]
-        output = 0
-        for i, coef in enumerate(weights):
-            output += coef * input ** i
+        # transform scalar input into vector
+        inputs = np.power(input, range(len(weights)))
+        # run forward pass
+        output = inputs.dot(weights)
         return output
 
     def train_nth_degree(self, data_x_raw, data_y, model_degree):
@@ -126,7 +135,7 @@ class ShallowNet:
         # one iteration per model degree
         for model_degree in range(1, POLYNOMIAL_DEGREE):
             single_output = self.train_nth_degree(data_x_raw, data_y,
-                                                 model_degree)
+                                                  model_degree)
             degree_data.append(single_output)
 
         min_error = degree_data[0][1]
