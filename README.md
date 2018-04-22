@@ -1,5 +1,5 @@
 # Polynomial Regression
-This repository contains an implementation of perceptron with linear activation for polynomial regression.
+This repository contains an implementation of a perceptron with linear activation for polynomial regression.
 
 
 ## Dependencies and installation
@@ -46,9 +46,9 @@ For example, to find the value of polynomial at point X=3 you want to run:
 The output will be a value of polynomial for specified input.
 
 ## The network
-Implemented network is a very simple 2 layer neural network.
+Implemented network is a very simple neural network with no hidden layers.
 
-The diagram of training the network for 3th degree polynomial could be described as follows:
+The diagram of training the network for 4th degree polynomial could be described as follows:
 
 ![alt text](https://github.com/jakubkarczewski/PolynomialRegression/blob/master/pics/net.png)
 
